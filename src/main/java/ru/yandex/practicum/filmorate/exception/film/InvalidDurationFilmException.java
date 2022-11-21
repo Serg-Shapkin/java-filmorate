@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exceptions.filmsExceptions;
+package ru.yandex.practicum.filmorate.exception.film;
 
 public class InvalidDurationFilmException extends RuntimeException {
     public InvalidDurationFilmException (String message) {

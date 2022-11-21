@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exceptions.usersExceptions;
+package ru.yandex.practicum.filmorate.exception.user;
 
 public class InvalidUserBirthdayException extends RuntimeException {
     public InvalidUserBirthdayException(String message) {
