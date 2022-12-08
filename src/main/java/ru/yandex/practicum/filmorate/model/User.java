@@ -5,17 +5,27 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class User {
-    private int id;
-    private String email;
-    private String login;
+
+    private long id;
     private String name;
+    private String login;
+    private String email;
     private LocalDate birthday;
+
+   private Set<Long> friends;
+
+    public User(long id, String name, String login, String email, LocalDate birthday) {
+        this.id = id;
+        this.name = name;
+        this.login = login;
+        this.email = email;
+        this.birthday = birthday;
+    }
 
     @Override
     public boolean equals(Object o) {
