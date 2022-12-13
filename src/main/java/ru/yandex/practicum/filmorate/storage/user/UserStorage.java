@@ -4,14 +4,11 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface UserStorage {
-    void addUser(User user);                         // добавить пользователя
-    void updateUser(User user);                      // обновить пользователя
-    List<User> getAllUsers();                        // получить список всех пользователей
-    HashMap<Long, User> getUsers();                  // просто возвращает HashMap
+    User addUser(User user);                         // добавить пользователя
+    User updateUser(User user);                      // обновить пользователя
+    Map<Long, User> getAllUsers();                   // получить список всех пользователей
     User getUserById(long id);                       // получить пользователя по id
-    void addToFriends(long id, long friendId);       // добавить пользователя в друзья
-    void removeFromFriends(long id, long friendId);  // удалить пользователя из друзей
-    User getFriendsById(long id);                    // получить друзей пользователя по id
 }

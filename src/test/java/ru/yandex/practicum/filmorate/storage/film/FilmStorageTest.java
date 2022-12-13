@@ -1,20 +1,18 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class FilmStorageTest extends InMemoryFilmStorage {
-    InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+    FilmStorage filmStorage = new InMemoryFilmStorage();
 
     @DisplayName("Проверка добавления фильма")
     @Test
@@ -28,7 +26,7 @@ public class FilmStorageTest extends InMemoryFilmStorage {
         assertNotNull(film1, "Фильм не найден");
         assertEquals(film1, savedFilm, "Фильмы не совпадают");
 
-        final List<Film> films = filmStorage.getAllFilms();
+        final List<Film> films = new ArrayList<>(filmStorage.getAllFilms().values());
 
         assertNotNull(films, "Фильмы не возвращаются");
         assertEquals(1, films.size(), "Неверное количество фильмов");
@@ -53,7 +51,7 @@ public class FilmStorageTest extends InMemoryFilmStorage {
         assertNotNull(savedFilm, "Фильм не найден");
         assertEquals(newFilm, savedFilm, "Задачи не совпадают");
 
-        final List<Film> films = filmStorage.getAllFilms();
+        final List<Film> films = new ArrayList<>(filmStorage.getAllFilms().values());
         assertNotNull(films, "Фильмы не возвращаются");
         assertEquals(1, films.size(),"Неверное количество фильмов");
         assertEquals(newFilm, films.get(0),"Фильмы не совпадают");
@@ -68,7 +66,7 @@ public class FilmStorageTest extends InMemoryFilmStorage {
         filmStorage.addFilm(film1);
         filmStorage.addFilm(film2);
 
-        final List<Film> films = filmStorage.getAllFilms();
+        final List<Film> films = new ArrayList<>(filmStorage.getAllFilms().values());
 
         assertNotNull(films, "Фильмы не возвращаются");
         assertEquals(2, films.size(), "Неверное количество фильмов");
@@ -86,45 +84,5 @@ public class FilmStorageTest extends InMemoryFilmStorage {
 
         assertNotNull(savedFilm, "Фильм не найден");
         assertEquals(filmId, film1.getId(), "Id фильмов не совпадают");
-    }
-
-    @DisplayName("Проверка добавления лайка фильму")
-    @Test
-    void checkingAddLikeFilm() {
-        Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90);
-        film1.setLikes(new HashSet<>()); // костыль =/
-        User user1 = new User(5, "test@yandex.ru", "testUser", "Ivan Ivanov", LocalDate.of(1990, 10, 10));
-
-        filmStorage.addFilm(film1);
-
-        final long filmId = film1.getId();
-        final long userId = user1.getId();
-
-        filmStorage.addLikeFilm(filmId, userId);
-
-        final Film savedFilm = filmStorage.getFilmById(filmId);
-
-        assertNotNull(savedFilm.getLikes(), "Лайк не найден");
-        assertEquals(1, savedFilm.getLikes().size(), "Неверное количество лайков");
-    }
-
-    @DisplayName("Проверка удаления лайка у фильма")
-    @Test
-    void checkingRemoveLikeFilm() {
-        Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90);
-        film1.setLikes(new HashSet<>()); // костыль =/
-        User user1 = new User(5, "test@yandex.ru", "testUser", "Ivan Ivanov", LocalDate.of(1990, 10, 10));
-
-        filmStorage.addFilm(film1);
-
-        final long filmId = film1.getId();
-        final long userId = user1.getId();
-
-        filmStorage.addLikeFilm(filmId, userId);
-        filmStorage.removeLikeFilm(filmId, userId);
-
-        final Film savedFilm = filmStorage.getFilmById(filmId);
-
-        assertEquals(0, savedFilm.getLikes().size(), "Неверное количество лайков");
     }
 }

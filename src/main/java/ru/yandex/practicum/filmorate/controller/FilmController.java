@@ -2,14 +2,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/films")  // http://localhost:8080/films
+@RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
 
@@ -33,20 +33,20 @@ public class FilmController {
         return filmService.getAllFilms();
     }
 
-    @GetMapping("{id}")  // получить фильм по id
+    @GetMapping("/{id}")  // получить фильм по id
     public Film getFilmById(
             @PathVariable("id") String id) {
         return filmService.getFilmById(Long.parseLong(id));
     }
 
-    @PutMapping("{id}/like/{userId}") // id - какому фильму, userId - кто ставит
+    @PutMapping("/{id}/like/{userId}") // id - какому фильму, userId - кто ставит
     public Film addLikeFilm(
             @PathVariable("id") String id,
             @PathVariable("userId") String userId) {
         return filmService.addLikeFilm(Long.parseLong(id), Long.parseLong(userId));
     }
 
-    @DeleteMapping("{id}/like/{userId}")
+    @DeleteMapping("/{id}/like/{userId}")
     public Film removeLikeFilm(
             @PathVariable("id") String id,
             @PathVariable("userId") String userId) {
@@ -56,6 +56,9 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getPopularFilms(
             @RequestParam(value = "count", defaultValue = "10", required = false) String count) {
+        if (Long.parseLong(count) < 0) {
+            throw new IncorrectParameterException("count");
+        }
         return filmService.getPopularFilms(Long.parseLong(count));
     }
 }

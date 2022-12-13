@@ -4,8 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.film.*;
-import ru.yandex.practicum.filmorate.exception.user.*;
+import ru.yandex.practicum.filmorate.exception.film.FilmValidationException;
+import ru.yandex.practicum.filmorate.exception.film.IncorrectFilmIdException;
+import ru.yandex.practicum.filmorate.exception.film.InvalidFilmNameException;
+import ru.yandex.practicum.filmorate.exception.film.InvalidReleaseDateFilmException;
+import ru.yandex.practicum.filmorate.exception.user.IncorrectUserIdException;
+import ru.yandex.practicum.filmorate.exception.user.UserDatabaseIsEmptyException;
+import ru.yandex.practicum.filmorate.exception.user.UserValidationException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
 @RestControllerAdvice
@@ -13,7 +18,15 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - фильм добавлен ранее
-    public ErrorResponse handleDuplicateFilmException(final DuplicateFilmException e) {
+    public ErrorResponse handleFilmValidationException(final FilmValidationException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - фильм добавлен ранее/отсутствует в базе
+    public ErrorResponse handleIncorrectFilmIdException(final IncorrectFilmIdException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
@@ -21,149 +34,43 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - пустое название фильма
-    public ErrorResponse handlerInvalidFilmNameException(final InvalidFilmNameException e) {
+    public ErrorResponse handleInvalidFilmNameException(final InvalidFilmNameException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - длина описания фильма
-    public ErrorResponse handlerInvalidDescriptionFilmException(final InvalidDescriptionFilmException e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - ошибка дата релиза фильма
+    public ErrorResponse handleInvalidReleaseDateFilmException(final InvalidReleaseDateFilmException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - дата релиза
-    public ErrorResponse handlerInvalidReleaseDateFilmException(final InvalidReleaseDateFilmException e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - пользователь добавлен ранее / указан некорректный id
+    public ErrorResponse handleIncorrectUserIdException(final IncorrectUserIdException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - продолжительность фильма
-    public ErrorResponse handlerInvalidDurationFilmException(final InvalidDurationFilmException e) {
+    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - нет пользователей в базе
+    public ErrorResponse handleUserDatabaseIsEmptyException(final UserDatabaseIsEmptyException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - фильм отсутствует в базе (обновление)
-    public ErrorResponse handlerInvalidFilmException(final InvalidFilmException e) {
+    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - пользователь не найден в базе
+    public ErrorResponse handleUserValidationException(final UserValidationException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - пустое хранилище фильмов (getAllFilms, getPopularFilms)
-    public ErrorResponse handlerFilmDatabaseIsEmptyException(final FilmDatabaseIsEmptyException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - фильм по id не найден (getFilmById, addLikeFilm, removeLikeFilm)
-    public ErrorResponse handlerInvalidIdFilmException(final InvalidIdFilmException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    //***
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - пользователь по id не найден (addLikeFilm, removeLikeFilm, getUserById)
-    public ErrorResponse handlerInvalidIdUserException(final InvalidIdUserException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - у фильма еще нет лайков
-    public ErrorResponse handlerInvalidCountLikesFilmException(final InvalidCountLikesFilmException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - пользователь еще не поставил лайк этому фильму
-    public ErrorResponse handlerInvalidRemoveLikeFilmException(final InvalidRemoveLikeFilmException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - пользователь был созлан ранее
-    public ErrorResponse handlerDuplicateUserException(final DuplicateUserException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - проверка электронной почты пользователя
-    public ErrorResponse handlerInvalidUserEmailException(final InvalidUserEmailException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - проверка логина пользователя
-    public ErrorResponse handlerInvalidUserLoginException(final InvalidUserLoginException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - проверка даты рождения пользователя
-    public ErrorResponse handlerInvalidUserBirthdayException(final InvalidUserBirthdayException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - пользователь отсутствует в базе (обновление)
-    public ErrorResponse handlerInvalidUserException(final InvalidUserException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - пустое хранилище пользователей (getAllUsers)
-    public ErrorResponse handlerUserDatabaseIsEmptyException(final UserDatabaseIsEmptyException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - ошибка добавления в друзья самого себя
-    public ErrorResponse handlerWhenAddingUsersException(final WhenAddingUsersException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - ошибка добавления в друзья самого себя
-    public ErrorResponse handlerRemoveFromFriendsException(final RemoveFromFriendsException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // код ответа 500

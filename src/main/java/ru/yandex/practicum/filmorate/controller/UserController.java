@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,12 +19,12 @@ public class UserController {
     }
 
     @PostMapping
-    public User addUser(@RequestBody User user) {
+    public User addUser(@Valid @RequestBody User user) {
         return userService.addUser(user);
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         return userService.updateUser(user);
     }
 
@@ -32,7 +33,7 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("{id}")  // получить пользователя по id
+    @GetMapping("/{id}")  // получить пользователя по id
     public User getUserById(
             @PathVariable("id") String id) {
         return userService.getUserById(Long.parseLong(id));
@@ -49,7 +50,7 @@ public class UserController {
     public User removeFromFriends(
             @PathVariable("id") String id,
             @PathVariable("friendId") String friendId) {
-        return userService.removeFromFriends(Long.parseLong(id), Long.parseLong(friendId));
+        return userService.removeFriend(Long.parseLong(id), Long.parseLong(friendId));
     }
 
     @GetMapping("/{id}/friends")  // получить друзей пользователя по id
@@ -58,7 +59,7 @@ public class UserController {
         return userService.getFriendsById(Long.parseLong(id));
     }
 
-    @GetMapping("{id}/friends/common/{otherId}")  // получить списко друзей, общих с другим пользхователем
+    @GetMapping("/{id}/friends/common/{otherId}")  // получить список друзей, общих с другим пользователем
     public List<User> getCommonFriends(
             @PathVariable("id") String id,
             @PathVariable("otherId") String otherId) {

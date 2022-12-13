@@ -1,42 +1,35 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.time.LocalDate;
 import java.util.*;
 
 @Getter
 @Setter
+@EqualsAndHashCode
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class User {
 
     private long id;
     private String name;
+
+    @NotNull
+    @NotBlank
     private String login;
+
+    @Email
     private String email;
+
+    @Past
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
-   private Set<Long> friends;
-
-    public User(long id, String name, String login, String email, LocalDate birthday) {
-        this.id = id;
-        this.name = name;
-        this.login = login;
-        this.email = email;
-        this.birthday = birthday;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return login.equals(user.login);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(login);
-    }
+    private final Set<Long> friends = new HashSet<>();
 }
