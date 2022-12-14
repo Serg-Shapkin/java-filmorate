@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.film.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.film.IncorrectFilmIdException;
 import ru.yandex.practicum.filmorate.exception.film.InvalidFilmNameException;
 import ru.yandex.practicum.filmorate.exception.film.InvalidReleaseDateFilmException;
@@ -62,7 +61,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film getFilmById(long id) {
         if (!films.containsKey(id)){
             log.error("Фильм с id={} не найден в базе", id);
-            throw new FilmValidationException(String.format("Фильм с id=%s не найден в базе", id));
+            throw new IncorrectFilmIdException(String.format("Фильм с id=%s не найден в базе", id));
         } else {
             log.info("Запрошен фильм c id={}", id);
             return films.get(id);
