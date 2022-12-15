@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +15,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements UserServiceDepartment {
     private final static Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserStorage userStorage;
 
-    @Autowired
     public UserService() {
         this.userStorage = new InMemoryUserStorage();
     }
@@ -41,6 +40,7 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
+    @Override
     public User addToFriends(long id, long friendId) { // id - кому? friendId - кого?
         userValidation(id);
         userValidation(friendId);
@@ -56,6 +56,7 @@ public class UserService {
         return user;
     }
 
+    @Override
     public User removeFriend(long id, long friendId) {
         userValidation(id);
         userValidation(friendId);
@@ -67,9 +68,11 @@ public class UserService {
         log.info("Пользователь {} удалил из друзей пользователя {}", user.getName(), friendUser.getName());
         friendUser.getFriends().remove(id); // обратное удаление из друзей
         log.info("Пользователь {} удалил из друзей пользователя {}", friendUser.getName(), user.getName());
+
         return user;
     }
 
+    @Override
     public List<User> getFriendsById(long id) {
         userValidation(id);
 
@@ -84,9 +87,11 @@ public class UserService {
             }
 
         log.info("Запрошен список друзей пользователя {}", user.getName());
+
         return friendsUser;
     }
 
+    @Override
     public List<User> getCommonFriends(long id, long otherId) { // общие друзья
         userValidation(id);
         userValidation(otherId);
@@ -98,6 +103,7 @@ public class UserService {
                 .filter(userTwo::contains)
                 .collect(Collectors.toList());
         log.info("Запрошен общий список друзей друзей");
+
         return common;
     }
 

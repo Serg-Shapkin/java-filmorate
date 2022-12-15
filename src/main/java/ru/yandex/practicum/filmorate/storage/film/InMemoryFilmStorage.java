@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.film.IncorrectFilmIdException;
 import ru.yandex.practicum.filmorate.exception.film.InvalidFilmNameException;
 import ru.yandex.practicum.filmorate.exception.film.InvalidReleaseDateFilmException;
@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 import java.util.*;
 
-@Component
+@Repository
 public class InMemoryFilmStorage implements FilmStorage {
     private final static Logger log = LoggerFactory.getLogger(InMemoryFilmStorage.class);
     private final HashMap<Long, Film> films = new HashMap<>();

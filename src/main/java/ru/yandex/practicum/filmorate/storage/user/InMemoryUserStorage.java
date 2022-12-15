@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.user.IncorrectUserIdException;
 import ru.yandex.practicum.filmorate.exception.user.UserDatabaseIsEmptyException;
 import ru.yandex.practicum.filmorate.exception.user.UserValidationException;
@@ -11,7 +12,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Repository
 public class InMemoryUserStorage implements UserStorage {
 
     private final static Logger log = LoggerFactory.getLogger(InMemoryUserStorage.class);
