@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.film.FilmValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class FilmService implements FilmServiceDepartment {
+public class FilmService implements FilmServiceImpl {
     private final static Logger log = LoggerFactory.getLogger(FilmService.class);
     private final FilmStorage filmStorage;
     private final UserService userService;
@@ -26,18 +25,22 @@ public class FilmService implements FilmServiceDepartment {
         this.filmStorage = new InMemoryFilmStorage();
     }
 
+    @Override
     public Film addFilm(Film film){
         return filmStorage.addFilm(film);
     }
 
+    @Override
     public Film updateFilm(Film film){
         return filmStorage.updateFilm(film);
     }
 
+    @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(filmStorage.getAllFilms().values());
     }
 
+    @Override
     public Film getFilmById(long id) {
         return filmStorage.getFilmById(id);
     }

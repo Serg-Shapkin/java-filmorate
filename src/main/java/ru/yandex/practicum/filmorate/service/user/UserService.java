@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.user.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -15,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService implements UserServiceDepartment {
+public class UserService implements UserServiceImpl {
     private final static Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserStorage userStorage;
 
@@ -23,18 +22,21 @@ public class UserService implements UserServiceDepartment {
         this.userStorage = new InMemoryUserStorage();
     }
 
+    @Override
     public User addUser(User user) {
         return userStorage.addUser(user);
     }
 
+    @Override
     public User updateUser(User user){
         return userStorage.updateUser(user);
     }
 
+    @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(userStorage.getAllUsers().values());
     }
-
+    @Override
     public User getUserById(long id) {
         userValidation(id);
         return userStorage.getUserById(id);
