@@ -17,7 +17,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class User {
 
-    private long id;
+    private int id;
     private String name;
 
     @NotNull
@@ -31,5 +31,6 @@ public class User {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
-    private final Set<Long> friends = new HashSet<>();
+    private Set<Integer> friends = new HashSet<>();
+
 }

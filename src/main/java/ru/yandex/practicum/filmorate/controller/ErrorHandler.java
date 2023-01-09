@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.exception.film.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.film.IncorrectFilmIdException;
 import ru.yandex.practicum.filmorate.exception.film.InvalidFilmNameException;
 import ru.yandex.practicum.filmorate.exception.film.InvalidReleaseDateFilmException;
+import ru.yandex.practicum.filmorate.exception.genre.IncorrectGenreIdException;
+import ru.yandex.practicum.filmorate.exception.mpa.IncorrectMpaIdException;
 import ru.yandex.practicum.filmorate.exception.user.IncorrectUserIdException;
 import ru.yandex.practicum.filmorate.exception.user.UserDatabaseIsEmptyException;
 import ru.yandex.practicum.filmorate.exception.user.UserValidationException;
@@ -49,7 +51,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // код 400 - пользователь добавлен ранее / указан некорректный id
+    @ResponseStatus(HttpStatus.NOT_FOUND) // код 400 - пользователь добавлен ранее / указан некорректный id
     public ErrorResponse handleIncorrectUserIdException(final IncorrectUserIdException e) {
         return new ErrorResponse(
                 e.getMessage()
@@ -67,6 +69,22 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - пользователь не найден в базе
     public ErrorResponse handleUserValidationException(final UserValidationException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - рейтинг не найден в базе
+    public ErrorResponse handleIncorrectMpaIdException(final IncorrectMpaIdException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND) // код 404 - жанр не найден в базе
+    public ErrorResponse handleIncorrectGenreIdException(final IncorrectGenreIdException e) {
         return new ErrorResponse(
                 e.getMessage()
         );

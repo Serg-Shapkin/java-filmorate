@@ -1,24 +1,78 @@
 package ru.yandex.practicum.filmorate.service.user;
 
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.user.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public interface UserServiceImpl {
+@Service
+public class UserServiceImpl implements UserService {
+    private final UserDbStorage userDbStorage; // изменил
 
-    User addUser(User user);
+    public UserServiceImpl(UserDbStorage userStorage) {
+        this.userDbStorage = userStorage;
+    }
 
-    User updateUser(User user);
+    @Override
+    public User addUser(User user) {
+        return userDbStorage.addUser(user);
+    }
 
-    List<User> getAllUsers();
+    @Override
+    public User updateUser(User user) {
+        userValidation(user.getId());
+        return userDbStorage.updateUser(user);
+    }
 
-    User getUserById(long id);
+    @Override
+    public List<User> getAllUsers() {
+        return new ArrayList<>(userDbStorage.getAllUsers());
+    }
 
-    User addToFriends(long id, long friendId);
+    @Override
+    public User getUserById(Integer id) {
+        userValidation(id);
+        return userDbStorage.getUserById(id);
+    }
 
-    User removeFriend(long id, long friendId);
+    @Override
+    public User addToFriends(Integer id, Integer friendId) {
+        userValidation(id);
+        userValidation(friendId);
 
-    List<User> getFriendsById(long id);
+        userDbStorage.addToFriends(id, friendId);
+        return userDbStorage.getUserById(id);
+    }
 
-    List<User> getCommonFriends(long id, long otherId);
+    @Override
+    public User removeFriend(Integer id, Integer friendId) {
+        userValidation(id);
+        userValidation(friendId);
+
+        userDbStorage.removeFriend(id, friendId);
+        return userDbStorage.getUserById(id);
+    }
+
+    @Override
+    public List<User> getFriendsById(Integer id) {
+        userValidation(id);
+        return userDbStorage.getFriendsById(id);
+    }
+
+    @Override
+    public List<User> getCommonFriends(Integer id, Integer otherId) { // общие друзья
+        userValidation(id);
+        userValidation(otherId);
+
+        return userDbStorage.getCommonFriends(id, otherId);
+    }
+
+    private void userValidation(Integer id) {
+        if (userDbStorage.getUserById(id) == null) {
+            throw new UserValidationException(String.format("Пользователь с id=%s не найден в базе", id));
+        }
+    }
 }

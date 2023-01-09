@@ -8,17 +8,17 @@ import ru.yandex.practicum.filmorate.exception.user.UserDatabaseIsEmptyException
 import ru.yandex.practicum.filmorate.exception.user.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryUserStorage implements UserStorage {
 
     private final static Logger log = LoggerFactory.getLogger(InMemoryUserStorage.class);
 
-    public final HashMap<Long, User> users = new HashMap<>();
+    public final HashMap<Integer, User> users = new HashMap<>();
 
-    private long userId = 1;
+    private int userId = 1;
 
     @Override
     public User addUser(User user) {
@@ -49,21 +49,90 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Map<Long, User> getAllUsers() {
+    public List<User> getAllUsers() {
         if (users.isEmpty()) {
             log.error("В базе не сохранено ни одного пользователя");
             throw new UserDatabaseIsEmptyException("В базе не сохранено ни одного пользователя");
         }
-        return users;
+        return new ArrayList<>(users.values());
     }
 
     @Override
-    public User getUserById(long id) {   // получить пользователя по id
+    public User getUserById(Integer id) {   // получить пользователя по id
         if (!users.containsKey(id)) {
             log.error("Указан некорректный id пользователя");
             throw new IncorrectUserIdException("Указан некорректный id пользователя"); // 404
         }
         log.info("Запрошен пользователь c id={}", id);
         return users.get(id);
+    }
+
+    @Override
+    public void addToFriends(Integer id, Integer friendId) {
+        userValidation(id);
+        userValidation(friendId);
+
+        User user = users.get(id);
+        User friendUser = users.get(friendId);
+
+        user.getFriends().add(friendId); // прямое добавление в друзья
+        log.info("Пользователь {} добавил в друзья пользователя {}", user.getName(), friendUser.getName());
+        friendUser.getFriends().add(id); // обратное добавление в друзья
+        log.info("Пользователь {} добавил в друзья пользователя {}", friendUser.getName(), user.getName());
+    }
+
+    @Override
+    public void removeFriend(Integer id, Integer friendId) {
+        userValidation(id);
+        userValidation(friendId);
+
+        User user = users.get(id);
+        User friendUser = users.get(friendId);
+
+        user.getFriends().remove(friendId); // прямое удаление из друзей
+        log.info("Пользователь {} удалил из друзей пользователя {}", user.getName(), friendUser.getName());
+        friendUser.getFriends().remove(id); // обратное удаление из друзей
+        log.info("Пользователь {} удалил из друзей пользователя {}", friendUser.getName(), user.getName());
+    }
+
+    @Override
+    public List<User> getFriendsById(Integer id) {
+        userValidation(id);
+
+        User user = getUserById(id);                // получили пользователя
+        List<User> friendsUser = new ArrayList<>(); // создаем список для хранения друзей
+
+        Set<Integer> friendsId = user.getFriends(); // получили id всех друзей
+
+        for (Integer friend : friendsId) {
+            User userFriend = getUserById(friend);
+            friendsUser.add(userFriend);
+        }
+
+        log.info("Запрошен список друзей пользователя {}", user.getName());
+
+        return friendsUser;
+    }
+
+    @Override
+    public List<User> getCommonFriends(Integer id, Integer otherId) {
+        userValidation(id);
+        userValidation(otherId);
+
+        List<User> userOne = getFriendsById(id);
+        List<User> userTwo = getFriendsById(otherId);
+
+        List<User> common = userOne.stream()
+                .filter(userTwo::contains)
+                .collect(Collectors.toList());
+        log.info("Запрошен общий список друзей друзей");
+
+        return common;
+    }
+
+    private void userValidation(Integer id) {
+        if (!users.containsKey(id)) {
+            throw new UserValidationException(String.format("Пользователь с id=%s не найден в базе", id));
+        }
     }
 }

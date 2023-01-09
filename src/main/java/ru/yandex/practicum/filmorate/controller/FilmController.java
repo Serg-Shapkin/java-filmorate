@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmServiceImpl;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final FilmService filmService;
+    private final FilmServiceImpl filmService;
 
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(FilmServiceImpl filmService) {
         this.filmService = filmService;
     }
 
@@ -37,21 +37,21 @@ public class FilmController {
     @GetMapping("/{id}")  // получить фильм по id
     public Film getFilmById(
             @PathVariable("id") String id) {
-        return filmService.getFilmById(Long.parseLong(id));
+        return filmService.getFilmById(Integer.parseInt(id));
     }
 
     @PutMapping("/{id}/like/{userId}") // id - какому фильму, userId - кто ставит
     public Film addLikeFilm(
             @PathVariable("id") String id,
             @PathVariable("userId") String userId) {
-        return filmService.addLikeFilm(Long.parseLong(id), Long.parseLong(userId));
+        return filmService.addLikeFilm(Integer.parseInt(id), Integer.parseInt(userId));
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public Film removeLikeFilm(
             @PathVariable("id") String id,
             @PathVariable("userId") String userId) {
-        return filmService.removeLikeFilm(Long.parseLong(id), Long.parseLong(userId));
+        return filmService.removeLikeFilm(Integer.parseInt(id), Integer.parseInt(userId));
     }
 
     @GetMapping("/popular")
@@ -60,6 +60,6 @@ public class FilmController {
         if (Long.parseLong(count) < 0) {
             throw new IncorrectParameterException("count");
         }
-        return filmService.getPopularFilms(Long.parseLong(count));
+        return filmService.getPopularFilms(Integer.parseInt(count));
     }
 }
