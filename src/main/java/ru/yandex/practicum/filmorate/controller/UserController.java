@@ -20,49 +20,49 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        return userService.addUser(user);
+        return userService.add(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        return userService.updateUser(user);
+        return userService.update(user);
     }
 
     @GetMapping
     public List<User> getAllUsers() {
-        return userService.getAllUsers();
+        return userService.getAll();
     }
 
     @GetMapping("/{id}")  // получить пользователя по id
     public User getUserById(
-            @PathVariable("id") String id) {
-        return userService.getUserById(Long.parseLong(id));
+            @PathVariable("id") Integer id) {
+        return userService.getById(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")  // добавить пользователя в друзья
     public User addToFriends(
-            @PathVariable("id") String id,
-            @PathVariable("friendId") String friendId) {
-        return userService.addToFriends(Long.parseLong(id), Long.parseLong(friendId));
+            @PathVariable("id") Integer id,
+            @PathVariable("friendId") Integer friendId) {
+        return userService.addToFriends(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")  // удалить пользователя из друзей
     public User removeFromFriends(
-            @PathVariable("id") String id,
-            @PathVariable("friendId") String friendId) {
-        return userService.removeFriend(Long.parseLong(id), Long.parseLong(friendId));
+            @PathVariable("id") Integer id,
+            @PathVariable("friendId") Integer friendId) {
+        return userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")  // получить друзей пользователя по id
     public List<User> getFriendsById(
-            @PathVariable("id") String id) {
-        return userService.getFriendsById(Long.parseLong(id));
+            @PathVariable("id") Integer id) {
+        return userService.getFriendsById(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")  // получить список друзей, общих с другим пользователем
     public List<User> getCommonFriends(
-            @PathVariable("id") String id,
-            @PathVariable("otherId") String otherId) {
-        return userService.getCommonFriends(Long.parseLong(id), Long.parseLong(otherId));
+            @PathVariable("id") Integer id,
+            @PathVariable("otherId") Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }

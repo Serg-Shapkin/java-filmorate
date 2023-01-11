@@ -1,14 +1,17 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/films")
 public class FilmController {
@@ -21,45 +24,45 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        return filmService.addFilm(film);
+        return filmService.add(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return filmService.updateFilm(film);
+        return filmService.update(film);
     }
 
     @GetMapping
     public List<Film> getAllFilms() {
-        return filmService.getAllFilms();
+        return filmService.getAll();
     }
 
     @GetMapping("/{id}")  // получить фильм по id
     public Film getFilmById(
-            @PathVariable("id") String id) {
-        return filmService.getFilmById(Long.parseLong(id));
+            @PathVariable("id") Integer id) {
+        return filmService.getById(id);
     }
 
     @PutMapping("/{id}/like/{userId}") // id - какому фильму, userId - кто ставит
     public Film addLikeFilm(
-            @PathVariable("id") String id,
-            @PathVariable("userId") String userId) {
-        return filmService.addLikeFilm(Long.parseLong(id), Long.parseLong(userId));
+            @PathVariable("id") Integer id,
+            @PathVariable("userId") Integer userId) {
+        return filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public Film removeLikeFilm(
-            @PathVariable("id") String id,
-            @PathVariable("userId") String userId) {
-        return filmService.removeLikeFilm(Long.parseLong(id), Long.parseLong(userId));
+            @PathVariable("id") Integer id,
+            @PathVariable("userId") Integer userId) {
+        return filmService.removeLike(id, userId);
     }
 
     @GetMapping("/popular")
     public List<Film> getPopularFilms(
-            @RequestParam(value = "count", defaultValue = "10", required = false) String count) {
-        if (Long.parseLong(count) < 0) {
+            @RequestParam(value = "count", defaultValue = "10") @Positive Integer count) {
+        if (count < 0) {
             throw new IncorrectParameterException("count");
         }
-        return filmService.getPopularFilms(Long.parseLong(count));
+        return filmService.getPopular(count);
     }
 }
