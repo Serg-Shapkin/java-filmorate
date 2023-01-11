@@ -1,16 +1,12 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.relational.core.sql.Like;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -21,8 +17,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,15 +36,15 @@ class FilmorateApplicationTests {
 	@DisplayName("Проверка добавления пользователя")
 	public void testAddUser() {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
-		userStorage.addUser(user1);
+		userStorage.add(user1);
 
 		final int userId = user1.getId();
-		final User savedUser = userStorage.getUserById(userId);
+		final User savedUser = userStorage.getById(userId);
 
 		assertNotNull(user1, "Пользователь не найден");
 		assertEquals(user1, savedUser, "Пользователи не совпадают");
 
-		final List<User> users = new ArrayList<>(userStorage.getAllUsers());
+		final List<User> users = new ArrayList<>(userStorage.getAll());
 
 		assertNotNull(users, "Пользователи не возвращаются");
 		assertEquals(1, users.size(), "Неверное количество пользователей");
@@ -59,22 +55,22 @@ class FilmorateApplicationTests {
 	@DisplayName("Проверка обновления данных о пользователе")
 	void testUpdateUser() {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
-		userStorage.addUser(user1);
+		userStorage.add(user1);
 
 		final int userId = user1.getId();
-		User savedUser = userStorage.getUserById(userId);
+		User savedUser = userStorage.getById(userId);
 
 		User newUser = new User(1, "Oleg", "OlegIvanov", "olegivanov@ya.ru", LocalDate.of(1987, 5, 25), new HashSet<>());
 		newUser.setId(savedUser.getId());
 
 		savedUser = newUser;
-		userStorage.updateUser(savedUser);
+		userStorage.update(savedUser);
 
 
 		assertNotNull(savedUser, "Пользователь не найден");
 		assertEquals(newUser, savedUser, "Пользователи не совпадают");
 
-		final List<User> users = new ArrayList<>(userStorage.getAllUsers());
+		final List<User> users = new ArrayList<>(userStorage.getAll());
 		assertNotNull(users, "Пользователи не возвращаются");
 		assertEquals(1, users.size(),"Неверное количество пользователей");
 		assertEquals(newUser, users.get(0),"Пользователи не совпадают");
@@ -86,10 +82,10 @@ class FilmorateApplicationTests {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
 		User user2 = new User(2, "Oleg", "OlegIvanov", "olegivanov@ya.ru", LocalDate.of(1987, 5, 25), new HashSet<>());
 
-		userStorage.addUser(user1);
-		userStorage.addUser(user2);
+		userStorage.add(user1);
+		userStorage.add(user2);
 
-		final List<User> users = new ArrayList<>(userStorage.getAllUsers());
+		final List<User> users = new ArrayList<>(userStorage.getAll());
 
 		assertNotNull(users, "Пользователи не возвращаются");
 		assertEquals(2, users.size(),"Неверное количество пользователей");
@@ -100,10 +96,10 @@ class FilmorateApplicationTests {
 	@DisplayName("Проверка получения пользователя по id")
 	void testGetUserById() {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
-		userStorage.addUser(user1);
+		userStorage.add(user1);
 
 		final int userId = user1.getId();
-		final User savedUser = userStorage.getUserById(userId);
+		final User savedUser = userStorage.getById(userId);
 
 		assertNotNull(savedUser, "Пользователь не найден");
 		assertEquals(userId, user1.getId(), "Id пользователей не совпадают");
@@ -115,8 +111,8 @@ class FilmorateApplicationTests {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
 		User user2 = new User(2, "Oleg", "OlegIvanov", "olegivanov@ya.ru", LocalDate.of(1987, 5, 25), new HashSet<>());
 
-		userStorage.addUser(user1);
-		userStorage.addUser(user2);
+		userStorage.add(user1);
+		userStorage.add(user2);
 
 		userStorage.addToFriends(user1.getId(), user2.getId()); // первый добавил второго
 
@@ -133,8 +129,8 @@ class FilmorateApplicationTests {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
 		User user2 = new User(2, "Oleg", "OlegIvanov", "olegivanov@ya.ru", LocalDate.of(1987, 5, 25), new HashSet<>());
 
-		userStorage.addUser(user1);
-		userStorage.addUser(user2);
+		userStorage.add(user1);
+		userStorage.add(user2);
 
 		userStorage.addToFriends(user1.getId(), user2.getId()); // первый добавил второго
 		userStorage.removeFriend(user1.getId(), user2.getId()); // первый удалил второго
@@ -151,8 +147,8 @@ class FilmorateApplicationTests {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
 		User user2 = new User(2, "Oleg", "OlegIvanov", "olegivanov@ya.ru", LocalDate.of(1987, 5, 25), new HashSet<>());
 
-		userStorage.addUser(user1);
-		userStorage.addUser(user2);
+		userStorage.add(user1);
+		userStorage.add(user2);
 
 		userStorage.addToFriends(user1.getId(), user2.getId()); // первый добавил второго
 
@@ -170,9 +166,9 @@ class FilmorateApplicationTests {
 		User user2 = new User(2, "Oleg", "OlegIvanov", "olegivanov@ya.ru", LocalDate.of(1987, 5, 25), new HashSet<>());
 		User user3 = new User(3, "Sveta", "SvetaSvetlanova", "svetasvetlanova@ya.ru", LocalDate.of(1992, 8, 12), new HashSet<>());
 
-		userStorage.addUser(user1);
-		userStorage.addUser(user2);
-		userStorage.addUser(user3);
+		userStorage.add(user1);
+		userStorage.add(user2);
+		userStorage.add(user3);
 
 		userStorage.addToFriends(user1.getId(), user3.getId()); // первый добавил третьего
 		userStorage.addToFriends(user2.getId(), user3.getId()); // второй добавил третьего
@@ -187,16 +183,16 @@ class FilmorateApplicationTests {
 	@Test
 	@DisplayName("Проверка добавления фильма")
 	public void testAddFilm() {
-		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
-		filmStorage.addFilm(film1);
+		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
+		filmStorage.add(film1);
 
 		final int filmId = film1.getId();
-		final Film savedFilm = filmStorage.getFilmById(filmId);
+		final Film savedFilm = filmStorage.getById(filmId);
 
 		assertNotNull(film1, "Фильм не найден");
 		assertEquals(film1, savedFilm, "Фильмы не совпадают");
 
-		final List<Film> films = new ArrayList<>(filmStorage.getAllFilms());
+		final List<Film> films = new ArrayList<>(filmStorage.getAll());
 
 		assertNotNull(films, "Фильмы не возвращаются");
 		assertEquals(1, films.size(), "Неверное количество фильмов");
@@ -206,22 +202,22 @@ class FilmorateApplicationTests {
 	@Test
 	@DisplayName("Проверка обновления данных о фильме")
 	void testUpdateFilm() {
-		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
-		filmStorage.addFilm(film1);
+		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
+		filmStorage.add(film1);
 
 		final int filmId = film1.getId();
-		Film savedFilm = filmStorage.getFilmById(filmId);
+		Film savedFilm = filmStorage.getById(filmId);
 
-		Film newFilm = new Film(1, "NewFilm", "Description_New", LocalDate.of(2022, 2,25),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
+		Film newFilm = new Film(1, "NewFilm", "Description_New", LocalDate.of(2022, 2,25),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
 		newFilm.setId(savedFilm.getId());
 
 		savedFilm = newFilm;
-		filmStorage.updateFilm(savedFilm);
+		filmStorage.update(savedFilm);
 
 		assertNotNull(savedFilm, "Фильм не найден");
 		assertEquals(newFilm, savedFilm, "Задачи не совпадают");
 
-		final List<Film> films = new ArrayList<>(filmStorage.getAllFilms());
+		final List<Film> films = new ArrayList<>(filmStorage.getAll());
 		assertNotNull(films, "Фильмы не возвращаются");
 		assertEquals(1, films.size(),"Неверное количество фильмов");
 		assertEquals(newFilm, films.get(0),"Фильмы не совпадают");
@@ -230,13 +226,13 @@ class FilmorateApplicationTests {
 	@Test
 	@DisplayName("Проверка получения всех фильмов")
 	void testGetAllFilms() {
-		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
-		Film film2 = new Film(2, "TestFilm2", "Description_2", LocalDate.of(2022, 2,25),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
+		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
+		Film film2 = new Film(2, "TestFilm2", "Description_2", LocalDate.of(2022, 2,25),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
 
-		filmStorage.addFilm(film1);
-		filmStorage.addFilm(film2);
+		filmStorage.add(film1);
+		filmStorage.add(film2);
 
-		final List<Film> films = new ArrayList<>(filmStorage.getAllFilms());
+		final List<Film> films = new ArrayList<>(filmStorage.getAll());
 
 		assertNotNull(films, "Фильмы не возвращаются");
 		assertEquals(2, films.size(), "Неверное количество фильмов");
@@ -246,11 +242,11 @@ class FilmorateApplicationTests {
 	@Test
 	@DisplayName("Проверка получения фильма по id")
 	void TestGetFilmById() {
-		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
-		filmStorage.addFilm(film1);
+		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
+		filmStorage.add(film1);
 
 		final int filmId = film1.getId();
-		final Film savedFilm = filmStorage.getFilmById(filmId);
+		final Film savedFilm = filmStorage.getById(filmId);
 
 		assertNotNull(savedFilm, "Фильм не найден");
 		assertEquals(filmId, film1.getId(), "Id фильмов не совпадают");
@@ -260,15 +256,15 @@ class FilmorateApplicationTests {
 	@DisplayName("Проверка постановки лайка фильму")
 	public void testAddLikeFilm() {
 
-		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
-		filmStorage.addFilm(film1);
+		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
+		filmStorage.add(film1);
 
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
-		userStorage.addUser(user1);
+		userStorage.add(user1);
 
-		filmStorage.addLikeFilm(film1.getId(), user1.getId()); // какому фильму, кто поставил
+		filmStorage.addLike(film1.getId(), user1.getId()); // какому фильму, кто поставил
 
-		final List<Integer> likes = new ArrayList<>(filmStorage.getFilmById(film1.getId()).getLikes());
+		final List<Integer> likes = new ArrayList<>(filmStorage.getById(film1.getId()).getLikes());
 
 		assertNotNull(likes, "Лайки не возвращаются");
 		assertEquals(1, likes.size(),"Неверное количество лайков");
@@ -279,16 +275,16 @@ class FilmorateApplicationTests {
 	@DisplayName("Проверка удаления лайка фильму")
 	public void testRemoveLikeFilm() {
 
-		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
-		filmStorage.addFilm(film1);
+		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
+		filmStorage.add(film1);
 
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
-		userStorage.addUser(user1);
+		userStorage.add(user1);
 
-		filmStorage.addLikeFilm(film1.getId(), user1.getId()); // какому фильму, кто поставил
-		filmStorage.removeLikeFilm(film1.getId(), user1.getId()); // какому фильму, кто удалил
+		filmStorage.addLike(film1.getId(), user1.getId()); // какому фильму, кто поставил
+		filmStorage.removeLike(film1.getId(), user1.getId()); // какому фильму, кто удалил
 
-		final List<Integer> likes = new ArrayList<>(filmStorage.getFilmById(film1.getId()).getLikes());
+		final List<Integer> likes = new ArrayList<>(filmStorage.getById(film1.getId()).getLikes());
 
 		assertNotNull(likes, "Лайки не возвращаются");
 		assertEquals(0, likes.size(),"Неверное количество лайков");
@@ -300,23 +296,23 @@ class FilmorateApplicationTests {
 		User user1 = new User(1, "Ivan", "IvanIvanov", "ivanivanov@ya.ru", LocalDate.of(2000, 10, 5), new HashSet<>());
 		User user2 = new User(2, "Oleg", "OlegIvanov", "olegivanov@ya.ru", LocalDate.of(1987, 5, 25), new HashSet<>());
 
-		userStorage.addUser(user1);
-		userStorage.addUser(user2);
+		userStorage.add(user1);
+		userStorage.add(user2);
 
-		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
-		Film film2 = new Film(2, "TestFilm2", "Description_2", LocalDate.of(2022, 2,25),90, new HashSet<>(), 1, new Rating(2, "PG"), new ArrayList<>());
+		Film film1 = new Film(1, "TestFilm1", "Description_1", LocalDate.of(2022, 1,15),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
+		Film film2 = new Film(2, "TestFilm2", "Description_2", LocalDate.of(2022, 2,25),90, new HashSet<>(), 1, new Rating(2, "PG"), new LinkedHashSet<>());
 
-		filmStorage.addFilm(film1);
-		filmStorage.addFilm(film2);
+		filmStorage.add(film1);
+		filmStorage.add(film2);
 
 		// 1 лайк у film1
-		filmStorage.addLikeFilm(film1.getId(), user1.getId()); // лайк film1  от user1
+		filmStorage.addLike(film1.getId(), user1.getId()); // лайк film1  от user1
 
 		// 2 лайка у film2
-        filmStorage.addLikeFilm(film2.getId(), user1.getId());
-        filmStorage.addLikeFilm(film2.getId(), user2.getId());
+        filmStorage.addLike(film2.getId(), user1.getId());
+        filmStorage.addLike(film2.getId(), user2.getId());
 
-		final List<Film> popularFilm = new ArrayList<>(filmStorage.getPopularFilms(2));
+		final List<Film> popularFilm = new ArrayList<>(filmStorage.getPopular(2));
 
 		assertEquals(2, popularFilm.get(0).getLikes().size(),"Это не самый популярный фильм");
 	}

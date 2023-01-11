@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.genre;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -9,15 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     @Override
-    public List<Genre> getAllGenres() {
+    public List<Genre> getAll() {
         SqlRowSet genreRowSet = jdbcTemplate.queryForRowSet("SELECT * FROM GENRE");
         List<Genre> genres = new ArrayList<>();
         while (genreRowSet.next()) {
@@ -27,7 +25,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Genre getGenreById(Integer id) {
+    public Genre getById(Integer id) {
         SqlRowSet genreRowSet = jdbcTemplate.queryForRowSet("SELECT * FROM GENRE WHERE ID = ?", id);
         genreRowSet.next();
         if (genreRowSet.last()) {

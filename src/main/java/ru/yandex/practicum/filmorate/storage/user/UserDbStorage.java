@@ -1,32 +1,31 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.user.IncorrectUserIdException;
 import ru.yandex.practicum.filmorate.exception.user.UserDatabaseIsEmptyException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 
 import java.util.*;
 
 @Component
+@Slf4j
 public class UserDbStorage implements UserStorage {
-    private final static Logger log = LoggerFactory.getLogger(UserDbStorage.class);
     private int userId = 0;
     private final JdbcTemplate jdbcTemplate;
+    private final FriendStorage friendStorage;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, FriendStorage friendStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.friendStorage = friendStorage;
         makeUserId();
     }
 
     @Override
-    public User addUser(User user) {
-        if (user.getName() == null || user.getName().isBlank()) { // если имя == null или пусто
-            user.setName(user.getLogin()); // именем будет логин
-        }
+    public User add(User user) {
         userId++;
         user.setId(userId);
         jdbcTemplate.update("INSERT INTO USERS VALUES (?,?,?,?,?)",
@@ -42,7 +41,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         jdbcTemplate.update("UPDATE USERS SET NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ? WHERE USER_ID = ?",
                 user.getName(),
                 user.getLogin(),
@@ -60,7 +59,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAll() {
         SqlRowSet userRowSet = jdbcTemplate.queryForRowSet("SELECT * FROM USERS");
         List<User> allUsersDb = new ArrayList<>();
         while (userRowSet.next()) {
@@ -75,11 +74,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(Integer id) {
+    public User getById(Integer id) {
         SqlRowSet userRowSet = jdbcTemplate.queryForRowSet("SELECT * FROM USERS WHERE USER_ID = ?", id);
         userRowSet.next();
         if (userRowSet.last()) {
-            log.info("Запрошен пользователь c id={}", id);
+            // log.info("Запрошен пользователь c id={}", id);
             return makeUser(userRowSet);
         } else {
             log.error("Указан некорректный id пользователя");
@@ -89,37 +88,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addToFriends(Integer id, Integer friendId) {
-        SqlRowSet userRowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?", friendId, id);
-        SqlRowSet friendRowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?", id, friendId);
-        if (userRowSet.next()) {
-            if (friendRowSet.next()) {
-                jdbcTemplate.update("UPDATE FRIENDSHIP SET STATUS = true WHERE USER_ID = ? AND FRIEND_ID = ?", id, friendId);
-                jdbcTemplate.update("UPDATE FRIENDSHIP SET STATUS = true WHERE USER_ID = ? AND FRIEND_ID = ?", friendId, id);
-            } else {
-                jdbcTemplate.update("INSERT INTO FRIENDSHIP(USER_ID, FRIEND_ID, STATUS) VALUES (?, ?, TRUE)", id, friendId);
-                jdbcTemplate.update("UPDATE FRIENDSHIP SET STATUS = true WHERE USER_ID = ? AND FRIEND_ID = ?", friendId, id);
-            }
-        } else if (friendRowSet.next()) {
-            jdbcTemplate.update("UPDATE FRIENDSHIP SET STATUS = false WHERE USER_ID = ? AND FRIEND_ID = ?", id, friendId);
-        } else {
-            jdbcTemplate.update("INSERT INTO FRIENDSHIP(USER_ID, FRIEND_ID, STATUS) VALUES (?, ?, FALSE)", id, friendId);
-        }
+        friendStorage.addToFriends(id, friendId);
     }
 
     @Override
     public void removeFriend(Integer id, Integer friendId) {
-        SqlRowSet userRowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?", friendId, id);
-        SqlRowSet friendRowSet = jdbcTemplate.queryForRowSet("SELECT USER_ID FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?", id, friendId);
-        if (userRowSet.next()) {
-            if (friendRowSet.next()) {
-                jdbcTemplate.update("DELETE FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?", id, friendId);
-                jdbcTemplate.update("UPDATE FRIENDSHIP SET STATUS = false WHERE USER_ID = ? AND FRIEND_ID = ?", friendId, id);
-            } else {
-                jdbcTemplate.update("UPDATE FRIENDSHIP SET STATUS = false WHERE USER_ID = ? AND FRIEND_ID = ?", friendId, id);
-            }
-        } else if (friendRowSet.next()) {
-            jdbcTemplate.update("DELETE FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?", id, friendId);
-        }
+        friendStorage.removeFriend(id, friendId);
     }
 
     @Override
@@ -127,9 +101,9 @@ public class UserDbStorage implements UserStorage {
         List<User> friends = new ArrayList<>();
         SqlRowSet allFriendsRowSet = jdbcTemplate.queryForRowSet("SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?", id);
         while (allFriendsRowSet.next()) {
-            friends.add(getUserById(allFriendsRowSet.getInt("FRIEND_ID")));
+            friends.add(getById(allFriendsRowSet.getInt("FRIEND_ID")));
         }
-        log.info("Запрошен список друзей пользователя {}", getUserById(id).getName());
+        log.info("Запрошен список друзей пользователя {}", getById(id).getName());
         return friends;
     }
 
@@ -138,7 +112,7 @@ public class UserDbStorage implements UserStorage {
         List<User> friends = new ArrayList<>();
         SqlRowSet commonFriendsRowSet = jdbcTemplate.queryForRowSet("SELECT FRIEND_ID FROM FRIENDSHIP  WHERE USER_ID = ? OR USER_ID = ? GROUP BY FRIEND_ID HAVING COUNT(*) > 1", id, otherId);
         while (commonFriendsRowSet.next()) {
-            friends.add(getUserById(commonFriendsRowSet.getInt("FRIEND_ID")));
+            friends.add(getById(commonFriendsRowSet.getInt("FRIEND_ID")));
         }
         log.info("Запрошен общий список друзей друзей");
         return friends;
@@ -150,7 +124,7 @@ public class UserDbStorage implements UserStorage {
         user.setName(userRowSet.getString("NAME"));
         user.setLogin(userRowSet.getString("LOGIN"));
         user.setEmail(userRowSet.getString("EMAIL"));
-        user.setBirthday(userRowSet.getDate("BIRTHDAY").toLocalDate());
+        user.setBirthday(Objects.requireNonNull(userRowSet.getDate("BIRTHDAY")).toLocalDate());
 
         SqlRowSet userRowSetFriends = jdbcTemplate.queryForRowSet("SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?",
                 userRowSet.getInt("USER_ID"));
@@ -165,10 +139,6 @@ public class UserDbStorage implements UserStorage {
 
     private void makeUserId() { // если в бд есть пользователи, то запоминаем максимальный id
         Integer userIdDb = jdbcTemplate.queryForObject("SELECT MAX(USER_ID) FROM USERS", Integer.class);
-        if (userIdDb == null) {
-            userId = 0;
-        } else {
-            userId = userIdDb;
-        }
+        userId = Objects.requireNonNullElse(userIdDb, 0);
     }
 }

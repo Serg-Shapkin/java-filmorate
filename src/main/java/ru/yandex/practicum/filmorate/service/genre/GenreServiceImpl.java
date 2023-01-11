@@ -1,26 +1,28 @@
 package ru.yandex.practicum.filmorate.service.genre;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.genre.IncorrectGenreIdException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GenreServiceImpl implements GenreService {
     private final GenreStorage genreStorage;
 
-    public GenreServiceImpl(GenreStorage genreStorage) {
-        this.genreStorage = genreStorage;
+    @Override
+    public List<Genre> getAll() {
+        return genreStorage.getAll();
     }
 
     @Override
-    public List<Genre> getAllGenres() {
-        return genreStorage.getAllGenres();
-    }
-
-    @Override
-    public Genre getGenreById(Integer id) {
-        return genreStorage.getGenreById(id);
+    public Genre getById(Integer id) {
+        if (genreStorage.getById(id) == null) {
+            throw new IncorrectGenreIdException("Указан некорректный id жанра");
+        }
+        return genreStorage.getById(id);
     }
 }

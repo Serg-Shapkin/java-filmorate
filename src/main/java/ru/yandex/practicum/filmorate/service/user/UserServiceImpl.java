@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.user.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -9,33 +10,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserDbStorage userDbStorage; // изменил
 
-    public UserServiceImpl(UserDbStorage userStorage) {
-        this.userDbStorage = userStorage;
+    @Override
+    public User add(User user) {
+        userNameValidation(user); // проверка имени пользователя
+        return userDbStorage.add(user);
     }
 
     @Override
-    public User addUser(User user) {
-        return userDbStorage.addUser(user);
-    }
-
-    @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         userValidation(user.getId());
-        return userDbStorage.updateUser(user);
+        userNameValidation(user); // проверка имени пользователя
+        return userDbStorage.update(user);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return new ArrayList<>(userDbStorage.getAllUsers());
+    public List<User> getAll() {
+        return new ArrayList<>(userDbStorage.getAll());
     }
 
     @Override
-    public User getUserById(Integer id) {
+    public User getById(Integer id) {
         userValidation(id);
-        return userDbStorage.getUserById(id);
+        return userDbStorage.getById(id);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
         userValidation(friendId);
 
         userDbStorage.addToFriends(id, friendId);
-        return userDbStorage.getUserById(id);
+        return userDbStorage.getById(id);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
         userValidation(friendId);
 
         userDbStorage.removeFriend(id, friendId);
-        return userDbStorage.getUserById(id);
+        return userDbStorage.getById(id);
     }
 
     @Override
@@ -71,8 +71,15 @@ public class UserServiceImpl implements UserService {
     }
 
     private void userValidation(Integer id) {
-        if (userDbStorage.getUserById(id) == null) {
+        if (userDbStorage.getById(id) == null) {
             throw new UserValidationException(String.format("Пользователь с id=%s не найден в базе", id));
         }
+    }
+
+    private User userNameValidation(User user) {
+        if (user.getName() == null || user.getName().isBlank()) { // если имя == null или пусто
+            user.setName(user.getLogin()); // именем будет логин
+        }
+        return user;
     }
 }

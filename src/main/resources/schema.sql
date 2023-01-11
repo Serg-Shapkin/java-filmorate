@@ -46,6 +46,9 @@ create table IF NOT EXISTS GENRE_FILM
 (
     FILM_ID  INTEGER,
     GENRE_ID INTEGER,
+    ID       INTEGER auto_increment
+        primary key
+        unique,
     constraint "FILM_GENRE_FILM_null_fk"
         foreign key (FILM_ID) references FILM,
     constraint "FILM_GENRE_GENRE_null_fk"
@@ -56,6 +59,9 @@ create table IF NOT EXISTS LIKES
 (
     FILM_ID INTEGER,
     USER_ID INTEGER,
+    ID      INTEGER auto_increment
+        primary key
+        unique,
     constraint LIKE_FILM_FILM_ID_FK
         foreign key (FILM_ID) references FILM,
     constraint LIKE_USERS_USER_ID_FK
@@ -67,6 +73,9 @@ create table IF NOT EXISTS FRIENDSHIP
     USER_ID   INTEGER not null,
     FRIEND_ID INTEGER not null,
     STATUS    BOOLEAN not null,
+    ID        INTEGER auto_increment
+        primary key
+        unique,
     constraint FRIENDSHIP_USERS_USER_ID_FK
         foreign key (USER_ID) references USERS,
     constraint FRIENDSHIP_USERS_USER_ID_FK_2

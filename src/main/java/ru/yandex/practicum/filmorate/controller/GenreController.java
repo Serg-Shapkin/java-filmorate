@@ -21,15 +21,12 @@ public class GenreController {
 
     @GetMapping
     public List<Genre> getAllGenres() {
-         return genreService.getAllGenres();
+         return genreService.getAll();
     }
 
     @GetMapping("/{id}")
     public Genre getGenreById(
             @PathVariable("id") Integer id) {
-        if (genreService.getGenreById(id) == null) {
-            throw new IncorrectGenreIdException("Указан некорректный id жанра");
-        }
-        return genreService.getGenreById(id);
+        return genreService.getById(id);
     }
 }

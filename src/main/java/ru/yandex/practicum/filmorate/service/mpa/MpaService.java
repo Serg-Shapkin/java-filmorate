@@ -5,6 +5,6 @@ import ru.yandex.practicum.filmorate.model.Rating;
 import java.util.List;
 
 public interface MpaService {
-    List<Rating> getAllRating();
-    Rating getRatingById(Integer id);
+    List<Rating> getAll();
+    Rating getById(Integer id);
 }
